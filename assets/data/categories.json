@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Pizza",
+    "image": "assets/images/categories/pizza.png",
+    "is_active": true
+  },
+  {
+    "id": 2,
+    "name": "Salad",
+    "image": "assets/images/categories/salad.png",
+    "is_active": true
+  },
+  {
+    "id": 3,
+    "name": "Dessert",
+    "image": "assets/images/categories/dessert.png",
+    "is_active": true
+  },
+  {
+    "id": 4,
+    "name": "Sides",
+    "image": "assets/images/categories/sides.png",
+    "is_active": true
+  },
+  {
+    "id": 5,
+    "name": "Drinks",
+    "image": "assets/images/categories/drinks.png",
+    "is_active": true
+  }
+]
