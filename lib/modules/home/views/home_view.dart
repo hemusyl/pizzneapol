@@ -68,20 +68,20 @@ class HomeView extends GetView<HomeController> {
 
                   return SizedBox(
                     height: 110,
-                    child: ListView.builder(
+                    child: ListView(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: controller.categories.length,
-                      itemBuilder: (context, index) {
-                        final category = controller.categories[index];
+                      physics: const BouncingScrollPhysics(),
+                      children: controller.categories.map((category) {
                         final isSelected = controller.selectedCategory.value?.id == category.id;
 
                         return CategoryItem(
+                          key: ValueKey(category.id),
                           category: category,
                           isSelected: isSelected,
                           onTap: () => controller.selectCategory(category),
                         );
-                      },
+                      }).toList(),
                     ),
                   );
                 }),
