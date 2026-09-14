@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pizzneapol/app/routes/app_routes.dart';
 import 'package:pizzneapol/main.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +11,7 @@ void main() {
     addTearDown(tester.view.reset);
 
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const PizzneapolApp());
+    await tester.pumpWidget(const PizzneapolApp(initialRoute: Routes.MAIN));
     await tester.pumpAndSettle();
 
     // 1. Header elements

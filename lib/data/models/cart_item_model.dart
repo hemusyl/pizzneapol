@@ -26,9 +26,16 @@ class CartItemModel {
 
   /// Deserialization from JSON
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> prodMap = (json['pizza'] is Map<String, dynamic>)
+        ? json['pizza'] as Map<String, dynamic>
+        : (json['product'] is Map<String, dynamic>)
+            ? json['product'] as Map<String, dynamic>
+            : json;
+
     return CartItemModel(
-      product: ProductModel.fromJson(json['product'] as Map<String, dynamic>),
-      selectedSize: json['selected_size']?.toString() ?? 'Medium',
+      product: ProductModel.fromJson(prodMap),
+      selectedSize: json['selected_size']?.toString() ??
+          (prodMap['size']?.toString() ?? 'Medium'),
       quantity: (json['quantity'] as num?)?.toInt() ?? 1,
     );
   }

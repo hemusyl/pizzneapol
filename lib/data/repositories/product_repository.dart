@@ -82,10 +82,11 @@ class ProductRepository implements IProductRepository {
       try {
         final response = await apiProvider!.getProductById(id);
         if (response.isOk && response.body != null) {
-          final dynamic data =
-              response.body is Map && response.body['data'] != null
-                  ? response.body['data']
-                  : response.body;
+          final dynamic data = response.body is Map
+              ? (response.body['pizza'] ??
+                  response.body['data'] ??
+                  response.body)
+              : response.body;
 
           if (data is Map<String, dynamic>) {
             return ProductModel.fromJson(data);

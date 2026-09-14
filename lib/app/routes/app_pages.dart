@@ -24,15 +24,23 @@ import '../../modules/profile/bindings/profile_binding.dart';
 import '../../modules/profile/views/profile_view.dart';
 import '../../modules/search/bindings/search_binding.dart';
 import '../../modules/search/views/search_view.dart';
+import '../../modules/splash/bindings/splash_binding.dart';
+import '../../modules/splash/views/splash_view.dart';
 import 'app_routes.dart';
 
 /// Centralized route registration using GetX GetPage definitions.
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.MAIN;
+  static const INITIAL = Routes.SPLASH;
 
   static final routes = [
+    GetPage(
+      name: Routes.SPLASH,
+      page: () => const SplashView(),
+      binding: SplashBinding(),
+      transition: Transition.fadeIn,
+    ),
     GetPage(
       name: Routes.MAIN,
       page: () => const MainNavView(),

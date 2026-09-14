@@ -120,10 +120,15 @@ class OrderRepository implements IOrderRepository {
                   : response.body;
 
           if (data is List) {
-            return data
+            final parsed = data
                 .map((item) =>
                     OrderModel.fromJson(item as Map<String, dynamic>))
                 .toList();
+            if (parsed.isNotEmpty) {
+              _localOrders.clear();
+              _localOrders.addAll(parsed);
+            }
+            return parsed;
           }
         }
       } catch (_) {
@@ -140,10 +145,11 @@ class OrderRepository implements IOrderRepository {
       try {
         final response = await api.getOrderById(id);
         if (response.isOk && response.body != null) {
-          final dynamic data =
-              response.body is Map && response.body['data'] != null
-                  ? response.body['data']
-                  : response.body;
+          final dynamic data = response.body is Map
+              ? (response.body['order'] ??
+                  response.body['data'] ??
+                  response.body)
+              : response.body;
 
           if (data is Map<String, dynamic>) {
             return OrderModel.fromJson(data);
@@ -166,18 +172,30 @@ class OrderRepository implements IOrderRepository {
     final api = apiProvider;
     if (api != null) {
       try {
-        final response = await api.createOrder(order.toJson());
-        if (response.isOk && response.body != null) {
-          final dynamic data =
-              response.body is Map && response.body['data'] != null
-                  ? response.body['data']
-                  : response.body;
+        final Map<String, dynamic> payload = {
+          'address': order.deliveryAddress.isNotEmpty
+              ? order.deliveryAddress
+              : 'Delivery Address',
+          'payment_method': 'cod',
+          'items': order.items
+              .map((item) => {
+                    'pizza_id': item.product.id,
+                    'quantity': item.quantity,
+                  })
+              .toList(),
+        };
 
-          if (data is Map<String, dynamic>) {
-            final created = OrderModel.fromJson(data);
-            _localOrders.insert(0, created);
-            return created;
+        final response = await api.createOrder(payload);
+        if (response.isOk && response.body != null) {
+          final dynamic body = response.body;
+          String newId = order.id;
+          if (body is Map && body['order_id'] != null) {
+            newId = body['order_id'].toString();
           }
+
+          final created = order.copyWith(id: newId, status: OrderStatus.pending);
+          _localOrders.insert(0, created);
+          return created;
         }
       } catch (_) {
         // Continue with local save if backend is unreachable

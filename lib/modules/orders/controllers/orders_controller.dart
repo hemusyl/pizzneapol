@@ -31,6 +31,9 @@ class OrdersController extends GetxController {
   /// Active tab index: 0 = Active Orders, 1 = Order History
   final RxInt selectedTab = 0.obs;
 
+  /// Loading state indicator
+  final RxBool isLoading = false.obs;
+
   /// Active order currently being viewed in the live tracker
   final Rxn<OrderModel> selectedTrackingOrder = Rxn<OrderModel>();
 
@@ -43,9 +46,16 @@ class OrdersController extends GetxController {
   /// Refreshes orders from the remote Laravel API if connected
   Future<void> refreshOrdersFromBackend() async {
     if (orderRepository.isRemote) {
-      final remoteOrders = await orderRepository.getOrders();
-      if (remoteOrders.isNotEmpty) {
-        orders.assignAll(remoteOrders);
+      try {
+        isLoading.value = true;
+        final remoteOrders = await orderRepository.getOrders();
+        if (remoteOrders.isNotEmpty) {
+          orders.assignAll(remoteOrders);
+        }
+      } catch (_) {
+        // Fallback gracefully on network error
+      } finally {
+        isLoading.value = false;
       }
     }
   }
@@ -69,14 +79,30 @@ class OrdersController extends GetxController {
 
   /// Adds a newly placed order from checkout
   void addOrder(OrderModel newOrder) {
-    orders.insert(0, newOrder);
+    final existingIdx = orders.indexWhere((o) => o.id == newOrder.id);
+    if (existingIdx != -1) {
+      orders[existingIdx] = newOrder;
+    } else {
+      orders.insert(0, newOrder);
+    }
     selectedTab.value = 0; // Switch to active tab
-    orderRepository.createOrder(newOrder);
   }
 
-  /// Selects an order for tracking modal
-  void setTrackingOrder(OrderModel order) {
+  /// Selects an order for tracking modal and fetches items if missing
+  void setTrackingOrder(OrderModel order) async {
     selectedTrackingOrder.value = order;
+    if (orderRepository.isRemote && order.items.isEmpty) {
+      try {
+        final detailed = await orderRepository.getOrderById(order.id);
+        if (detailed != null && selectedTrackingOrder.value?.id == order.id) {
+          selectedTrackingOrder.value = detailed;
+          final idx = orders.indexWhere((o) => o.id == order.id);
+          if (idx != -1) {
+            orders[idx] = detailed;
+          }
+        }
+      } catch (_) {}
+    }
   }
 
   /// Advances an order's lifecycle for demo / live tracking testing

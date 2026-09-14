@@ -45,6 +45,7 @@ abstract class IAuthRepository {
   });
 
   void logout();
+  void restoreSession({required UserModel user, required String token});
 
   bool get isAuthenticated;
   UserModel? get currentUser;
@@ -278,5 +279,12 @@ class AuthRepository implements IAuthRepository {
     _token = null;
     _currentUser = null;
     apiProvider?.clearAuthToken();
+  }
+
+  @override
+  void restoreSession({required UserModel user, required String token}) {
+    _currentUser = user;
+    _token = token;
+    apiProvider?.setAuthToken(token);
   }
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../../data/services/session_service.dart';
 import '../../profile/controllers/profile_controller.dart';
 
 /// Controller handling Customer Authentication (Login & Register) state and interactions.
@@ -101,24 +102,26 @@ class AuthController extends GetxController {
       isLoading.value = false;
 
       if (result.success && result.user != null) {
+        // Save session locally for persistence
+        await SessionService.saveSession(
+          token: result.token ?? '',
+          user: result.user!,
+        );
+
         // Synchronize with ProfileController if active
         if (Get.isRegistered<ProfileController>()) {
-          Get.find<ProfileController>().user.value = result.user!;
+          Get.find<ProfileController>().setUser(result.user!);
         }
-
-        _showSuccess('Welcome back, ${result.user!.name}!');
 
         // Clear password
         loginPasswordController.clear();
 
-        // Navigate
+        // Redirect immediately to Home screen
         if (Get.key.currentState != null) {
-          if (Get.key.currentState!.canPop()) {
-            Get.back();
-          } else {
-            Get.offAllNamed(Routes.MAIN);
-          }
+          Get.offAllNamed(Routes.MAIN);
         }
+
+        _showSuccess('Welcome back, ${result.user!.name}!');
         return true;
       } else {
         final err = result.formattedErrorString;
@@ -194,11 +197,14 @@ class AuthController extends GetxController {
       isLoading.value = false;
 
       if (result.success && result.user != null) {
-        if (Get.isRegistered<ProfileController>()) {
-          Get.find<ProfileController>().user.value = result.user!;
-        }
+        await SessionService.saveSession(
+          token: result.token ?? '',
+          user: result.user!,
+        );
 
-        _showSuccess('Account created successfully! Welcome, ${result.user!.name}.');
+        if (Get.isRegistered<ProfileController>()) {
+          Get.find<ProfileController>().setUser(result.user!);
+        }
 
         // Clear sensitive inputs
         registerPasswordController.clear();
@@ -207,6 +213,8 @@ class AuthController extends GetxController {
         if (Get.key.currentState != null) {
           Get.offAllNamed(Routes.MAIN);
         }
+
+        _showSuccess('Account created successfully! Welcome, ${result.user!.name}.');
         return true;
       } else {
         final err = result.formattedErrorString;
@@ -229,12 +237,13 @@ class AuthController extends GetxController {
 
   void logout() {
     authRepository.logout();
+    SessionService.clearSession();
     if (Get.isRegistered<ProfileController>()) {
       Get.find<ProfileController>().signOut();
     }
     _showSuccess('Signed out successfully.');
     if (Get.key.currentState != null) {
-      Get.offAllNamed(Routes.LOGIN);
+      Get.offAllNamed(Routes.MAIN);
     }
   }
 

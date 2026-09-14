@@ -58,25 +58,48 @@ class OrderModel {
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
+    double parseAmount(dynamic val, [double fallback = 0.0]) {
+      if (val is num) return val.toDouble();
+      if (val is String) return double.tryParse(val) ?? fallback;
+      return fallback;
+    }
+
+    final parsedTotal = parseAmount(json['total']);
+    final parsedSubtotal = parseAmount(json['subtotal'], parsedTotal);
+
+    DateTime parseDate() {
+      final raw = json['created_at'] ?? json['order_date'];
+      if (raw != null) {
+        return DateTime.tryParse(raw.toString()) ?? DateTime.now();
+      }
+      return DateTime.now();
+    }
+
+    OrderStatus parseStatus(String? raw) {
+      final s = raw?.toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+      if (s.contains('pending')) return OrderStatus.pending;
+      if (s.contains('prepar')) return OrderStatus.preparing;
+      if (s.contains('outfor') || s.contains('delivery') || s.contains('ontheway')) return OrderStatus.outForDelivery;
+      if (s.contains('deliver') || s.contains('completed')) return OrderStatus.delivered;
+      if (s.contains('cancel')) return OrderStatus.cancelled;
+      if (s.contains('confirm')) return OrderStatus.confirmed;
+      return OrderStatus.confirmed;
+    }
+
     return OrderModel(
       id: json['id']?.toString() ?? '',
       items: (json['items'] as List<dynamic>?)
               ?.map((item) => CartItemModel.fromJson(item as Map<String, dynamic>))
               .toList() ??
           [],
-      deliveryAddress: json['delivery_address']?.toString() ?? '',
-      paymentMethod: json['payment_method']?.toString() ?? '',
-      subtotal: (json['subtotal'] is num) ? (json['subtotal'] as num).toDouble() : 0.0,
-      deliveryFee: (json['delivery_fee'] is num) ? (json['delivery_fee'] as num).toDouble() : 0.0,
-      discount: (json['discount'] is num) ? (json['discount'] as num).toDouble() : 0.0,
-      total: (json['total'] is num) ? (json['total'] as num).toDouble() : 0.0,
-      orderDate: json['order_date'] != null
-          ? DateTime.tryParse(json['order_date'].toString()) ?? DateTime.now()
-          : DateTime.now(),
-      status: OrderStatus.values.firstWhere(
-        (s) => s.name.toLowerCase() == (json['status']?.toString().toLowerCase() ?? 'confirmed'),
-        orElse: () => OrderStatus.confirmed,
-      ),
+      deliveryAddress: json['address']?.toString() ?? json['delivery_address']?.toString() ?? '',
+      paymentMethod: json['payment_method']?.toString() ?? 'Cash on Delivery',
+      subtotal: parsedSubtotal,
+      deliveryFee: parseAmount(json['delivery_fee']),
+      discount: parseAmount(json['discount']),
+      total: parsedTotal,
+      orderDate: parseDate(),
+      status: parseStatus(json['status']?.toString()),
       deliveryNotes: json['delivery_notes']?.toString(),
     );
   }

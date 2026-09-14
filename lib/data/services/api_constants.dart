@@ -13,11 +13,13 @@ class ApiConstants {
 
   // Catalog Endpoints
   static const String categories = '/categories';
-  static const String products = '/products';
-  static const String productDetails = '/products/{id}';
+  static const String products = '/pizzas';
+  static const String productDetails = '/pizzas/{id}';
 
   // Order Endpoints
   static const String orders = '/orders';
+  static const String customerOrders = '/v1/customer/orders';
+  static const String customerOrderDetails = '/v1/customer/orders/{id}';
   static const String orderDetails = '/orders/{id}';
   static const String orderTracking = '/orders/{id}/tracking';
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pizzneapol/app/routes/app_routes.dart';
 import 'package:pizzneapol/main.dart';
 import 'package:pizzneapol/modules/home/widgets/category_item.dart';
 
@@ -9,7 +10,7 @@ void main() {
     tester.view.devicePixelRatio = 2.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(const PizzneapolApp());
+    await tester.pumpWidget(const PizzneapolApp(initialRoute: Routes.MAIN));
     await tester.pumpAndSettle();
 
     CategoryItem getCategoryItem(String name) {

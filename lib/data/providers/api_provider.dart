@@ -79,14 +79,14 @@ class ApiProvider extends GetConnect {
     return await post(ApiConstants.orders, orderJson);
   }
 
-  /// GET /orders: Retrieves orders for the authenticated customer
+  /// GET /v1/customer/orders: Retrieves orders for the authenticated customer
   Future<Response<dynamic>> getOrders() async {
-    return await get(ApiConstants.orders);
+    return await get(ApiConstants.customerOrders);
   }
 
-  /// GET /orders/{id}: Retrieves specific order details
+  /// GET /v1/customer/orders/{id}: Retrieves specific customer order details
   Future<Response<dynamic>> getOrderById(String id) async {
-    return await get('${ApiConstants.orders}/$id');
+    return await get('${ApiConstants.customerOrders}/$id');
   }
 
   /// PATCH /orders/{id}/status: Updates order status

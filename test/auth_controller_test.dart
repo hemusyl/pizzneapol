@@ -97,9 +97,9 @@ void main() {
 
       final success = await authController.login();
       expect(success, true);
-      expect(profileController.user.value.name, 'Real Customer');
-      expect(profileController.user.value.email, 'real@pizza.com');
-      expect(profileController.user.value.address, 'Banani 11');
+      expect(profileController.user.value!.name, 'Real Customer');
+      expect(profileController.user.value!.email, 'real@pizza.com');
+      expect(profileController.user.value!.address, 'Banani 11');
     });
 
     test('Successful registration updates profile and returns true', () async {
@@ -127,8 +127,8 @@ void main() {
 
       final success = await authController.register();
       expect(success, true);
-      expect(profileController.user.value.name, 'New Registered User');
-      expect(profileController.user.value.address, 'Gulshan 1');
+      expect(profileController.user.value!.name, 'New Registered User');
+      expect(profileController.user.value!.address, 'Gulshan 1');
     });
   });
 }
@@ -147,6 +147,12 @@ class _FakeAuthRepository implements IAuthRepository {
 
   @override
   String? get token => _token;
+
+  @override
+  void restoreSession({required UserModel user, required String token}) {
+    _user = user;
+    _token = token;
+  }
 
   @override
   Future<AuthResult> login({required String identifier, required String password}) async {

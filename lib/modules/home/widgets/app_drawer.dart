@@ -127,31 +127,41 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
-          _drawerItem(
-            icon: Icons.login_rounded,
-            title: 'Sign In / Register',
-            textColor: AppColors.primary,
-            iconColor: AppColors.primary,
-            onTap: () {
-              Get.back();
-              Get.toNamed(Routes.LOGIN);
-            },
-          ),
-          _drawerItem(
-            icon: Icons.logout_rounded,
-            title: 'Logout',
-            textColor: AppColors.error,
-            iconColor: AppColors.error,
-            onTap: () {
-              Get.back();
-              if (Get.isRegistered<AuthRepository>()) {
-                Get.find<AuthRepository>().logout();
-              }
-              if (Get.isRegistered<ProfileController>()) {
-                Get.find<ProfileController>().signOut();
-              }
-            },
-          ),
+          Obx(() {
+            final profileCtrl = Get.isRegistered<ProfileController>()
+                ? Get.find<ProfileController>()
+                : null;
+            final isLoggedIn = profileCtrl?.isLoggedIn ?? false;
+
+            if (!isLoggedIn) {
+              return _drawerItem(
+                icon: Icons.login_rounded,
+                title: 'Sign In / Register',
+                textColor: AppColors.primary,
+                iconColor: AppColors.primary,
+                onTap: () {
+                  Get.back();
+                  Get.toNamed(Routes.LOGIN);
+                },
+              );
+            }
+
+            return _drawerItem(
+              icon: Icons.logout_rounded,
+              title: 'Logout',
+              textColor: AppColors.error,
+              iconColor: AppColors.error,
+              onTap: () {
+                Get.back();
+                if (Get.isRegistered<AuthRepository>()) {
+                  Get.find<AuthRepository>().logout();
+                }
+                if (Get.isRegistered<ProfileController>()) {
+                  Get.find<ProfileController>().signOut();
+                }
+              },
+            );
+          }),
         ],
       ),
     );

@@ -32,37 +32,62 @@ class _OrdersViewState extends State<OrdersView> {
       appBar: AppBar(
         title: const Text('My Orders', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          // 1. Top Segmented Selector: Active Orders vs Order History
-          _buildSegmentedTabHeader(),
-          const SizedBox(height: 8),
-
-          // 2. Orders List
-          Expanded(
-            child: Obx(() {
-              final isCurrentTabActive = _controller.selectedTab.value == 0;
-              final orderList = isCurrentTabActive
-                  ? _controller.activeOrders
-                  : _controller.pastOrders;
-
-              if (orderList.isEmpty) {
-                return _buildEmptyOrdersView(isActiveTab: isCurrentTabActive);
-              }
-
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                physics: const BouncingScrollPhysics(),
-                itemCount: orderList.length,
-                itemBuilder: (context, index) {
-                  final order = orderList[index];
-                  return _buildOrderCard(context, order, isActive: isCurrentTabActive);
-                },
-              );
-            }),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Refresh Orders',
+            onPressed: () => _controller.refreshOrdersFromBackend(),
           ),
         ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () => _controller.refreshOrdersFromBackend(),
+        color: AppColors.primary,
+        child: Column(
+          children: [
+            // 1. Top Segmented Selector: Active Orders vs Order History
+            _buildSegmentedTabHeader(),
+            const SizedBox(height: 8),
+
+            // 2. Orders List
+            Expanded(
+              child: Obx(() {
+                if (_controller.isLoading.value && _controller.orders.isEmpty) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  );
+                }
+
+                final isCurrentTabActive = _controller.selectedTab.value == 0;
+                final orderList = isCurrentTabActive
+                    ? _controller.activeOrders
+                    : _controller.pastOrders;
+
+                if (orderList.isEmpty) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.65,
+                      child: _buildEmptyOrdersView(isActiveTab: isCurrentTabActive),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  itemCount: orderList.length,
+                  itemBuilder: (context, index) {
+                    final order = orderList[index];
+                    return _buildOrderCard(context, order, isActive: isCurrentTabActive);
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }

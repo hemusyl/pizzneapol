@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:pizzneapol/data/models/user_model.dart';
 import 'package:pizzneapol/modules/profile/controllers/profile_controller.dart';
 import 'package:pizzneapol/modules/profile/views/profile_view.dart';
 
 void main() {
-  testWidgets('ProfileView renders user info, account options, switches, and sign out', (WidgetTester tester) async {
+  testWidgets('ProfileView renders guest info and sign in button when unauthenticated', (WidgetTester tester) async {
     Get.reset();
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.0;
@@ -21,10 +22,10 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    // 1. Verify Header & User Info
+    // 1. Verify Header & Guest Info
     expect(find.text('My Profile'), findsOneWidget);
-    expect(find.text('Alex Johnson'), findsOneWidget);
-    expect(find.text('alex.johnson@example.com'), findsOneWidget);
+    expect(find.text('Guest User'), findsOneWidget);
+    expect(find.text('Sign in to access your account & orders'), findsOneWidget);
 
     // 2. Verify Account Options
     expect(find.text('Saved Addresses'), findsOneWidget);
@@ -43,7 +44,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.pushNotifications.value, isFalse);
 
-    // 5. Verify Sign Out Button and Dialog
+    // 5. Verify Sign In / Create Account button is present for guests
+    expect(find.text('Sign In / Create Account'), findsOneWidget);
+  });
+
+  testWidgets('ProfileView renders user info and sign out button when logged in', (WidgetTester tester) async {
+    Get.reset();
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() {
+      tester.view.reset();
+      Get.reset();
+    });
+
+    final controller = Get.put(ProfileController());
+    controller.setUser(
+      UserModel(
+        id: '1',
+        name: 'Maria Rossi',
+        email: 'maria@pizzneapol.com',
+        phone: '+1 555-1234',
+        memberSince: DateTime(2025, 1, 1),
+      ),
+    );
+
+    await tester.pumpWidget(const GetMaterialApp(
+      home: ProfileView(),
+    ));
+    await tester.pumpAndSettle();
+
+    // 1. Verify Header & User Info
+    expect(find.text('Maria Rossi'), findsOneWidget);
+    expect(find.text('maria@pizzneapol.com'), findsOneWidget);
+
+    // 2. Verify Sign Out Button and Dialog
     final signOutBtn = find.text('Sign Out');
     expect(signOutBtn, findsOneWidget);
     await tester.ensureVisible(signOutBtn);

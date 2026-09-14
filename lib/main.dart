@@ -10,7 +10,9 @@ void main() {
 }
 
 class PizzneapolApp extends StatelessWidget {
-  const PizzneapolApp({super.key});
+  final String? initialRoute;
+
+  const PizzneapolApp({super.key, this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +20,7 @@ class PizzneapolApp extends StatelessWidget {
       title: 'PIZZNEAPOL PIZZA',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      initialRoute: AppPages.INITIAL,
+      initialRoute: initialRoute ?? AppPages.INITIAL,
       getPages: AppPages.routes,
       initialBinding: InitialBinding(),
       defaultTransition: Transition.cupertino,

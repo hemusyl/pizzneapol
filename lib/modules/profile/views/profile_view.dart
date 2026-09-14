@@ -84,9 +84,15 @@ class _ProfileViewState extends State<ProfileView> {
         ),
         child: Obx(() {
           final user = _controller.user.value;
-          final initials = user.name.isNotEmpty
+          final isLoggedIn = user != null;
+          final name = isLoggedIn ? user.name : 'Guest User';
+          final email = isLoggedIn ? user.email : 'Sign in to access your account & orders';
+          final phone = isLoggedIn
+              ? (user.address.isNotEmpty ? user.address : user.phone)
+              : 'Tap to sign in / register';
+          final initials = isLoggedIn && user.name.isNotEmpty
               ? user.name.split(' ').map((n) => n.isNotEmpty ? n[0] : '').take(2).join()
-              : 'U';
+              : 'G';
 
           return Row(
             children: [
@@ -100,14 +106,20 @@ class _ProfileViewState extends State<ProfileView> {
                   border: Border.all(color: AppColors.primary, width: 2),
                 ),
                 child: Center(
-                  child: Text(
-                    initials,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.primary,
-                    ),
-                  ),
+                  child: isLoggedIn
+                      ? Text(
+                          initials,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.person_outline_rounded,
+                          size: 32,
+                          color: AppColors.primary,
+                        ),
                 ),
               ),
               const SizedBox(width: 14),
@@ -118,7 +130,7 @@ class _ProfileViewState extends State<ProfileView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user.name,
+                      name,
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
@@ -127,19 +139,19 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      user.email,
+                      email,
                       style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      user.phone,
+                      phone,
                       style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
               ),
 
-              // Edit Profile Icon Action
+              // Action button (Edit if logged in, Login if guest)
               IconButton(
                 icon: Container(
                   padding: const EdgeInsets.all(7),
@@ -147,9 +159,19 @@ class _ProfileViewState extends State<ProfileView> {
                     color: AppColors.primaryPeach,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.edit_rounded, color: AppColors.primary, size: 18),
+                  child: Icon(
+                    isLoggedIn ? Icons.edit_rounded : Icons.login_rounded,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
                 ),
-                onPressed: () => _showEditProfileDialog(context),
+                onPressed: () {
+                  if (isLoggedIn) {
+                    _showEditProfileDialog(context);
+                  } else {
+                    Get.toNamed(Routes.LOGIN);
+                  }
+                },
               ),
             ],
           );
@@ -339,56 +361,58 @@ class _ProfileViewState extends State<ProfileView> {
 
   /// Sign in and sign out buttons
   Widget _buildSignOutButton(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
+    return Obx(() {
+      final isLoggedIn = _controller.isLoggedIn;
+      if (!isLoggedIn) {
+        return SizedBox(
           width: double.infinity,
-          height: 50,
+          height: 52,
           child: ElevatedButton.icon(
             onPressed: () => Get.toNamed(Routes.LOGIN),
             icon: const Icon(Icons.login_rounded, color: Colors.white),
             label: const Text(
-              'Sign In / Switch Account',
+              'Sign In / Create Account',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 15,
+                fontSize: 16,
               ),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
               ),
-              elevation: 0,
+              elevation: 2,
+              shadowColor: AppColors.primary.withValues(alpha: 0.4),
+            ),
+          ),
+        );
+      }
+
+      return SizedBox(
+        width: double.infinity,
+        height: 50,
+        child: OutlinedButton.icon(
+          onPressed: () => _showSignOutConfirmDialog(context),
+          icon: const Icon(Icons.logout_rounded, color: AppColors.error),
+          label: const Text(
+            'Sign Out',
+            style: TextStyle(
+              color: AppColors.error,
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: AppColors.error, width: 1.2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: OutlinedButton.icon(
-            onPressed: () => _showSignOutConfirmDialog(context),
-            icon: const Icon(Icons.logout_rounded, color: AppColors.error),
-            label: const Text(
-              'Sign Out',
-              style: TextStyle(
-                color: AppColors.error,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.error, width: 1.2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+      );
+    });
   }
 
   Widget _menuTile({
@@ -415,9 +439,10 @@ class _ProfileViewState extends State<ProfileView> {
 
   /// Edit Profile Dialog
   void _showEditProfileDialog(BuildContext context) {
-    final nameController = TextEditingController(text: _controller.user.value.name);
-    final phoneController = TextEditingController(text: _controller.user.value.phone);
-    final emailController = TextEditingController(text: _controller.user.value.email);
+    final currentUser = _controller.user.value;
+    final nameController = TextEditingController(text: currentUser?.name ?? '');
+    final phoneController = TextEditingController(text: currentUser?.phone ?? '');
+    final emailController = TextEditingController(text: currentUser?.email ?? '');
 
     showDialog(
       context: context,

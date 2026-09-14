@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:pizzneapol/data/models/address_model.dart';
 import 'package:pizzneapol/data/models/payment_method.dart';
 import 'package:pizzneapol/data/models/product_model.dart';
+import 'package:pizzneapol/data/repositories/auth_repository.dart';
 import 'package:pizzneapol/modules/cart/controllers/cart_controller.dart';
 import 'package:pizzneapol/modules/checkout/controllers/checkout_controller.dart';
 
@@ -124,6 +125,17 @@ void main() {
       expect(cartController.cartItems.isEmpty, isTrue);
       expect(cartController.itemCount, equals(0));
       expect(checkoutController.lastPlacedOrder.value, equals(order));
+    });
+
+    test('placeOrder redirects unauthenticated user to login when AuthRepository is registered', () async {
+      // Register unauthenticated AuthRepository
+      Get.put<AuthRepository>(AuthRepository());
+      cartController.addToCart(testProduct1, quantity: 1);
+
+      final order = await checkoutController.placeOrder();
+      expect(order, isNull);
+      // Cart should remain intact
+      expect(cartController.cartItems.length, equals(1));
     });
   });
 }

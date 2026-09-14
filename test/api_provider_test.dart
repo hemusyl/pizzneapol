@@ -37,8 +37,9 @@ void main() {
 
     test('ApiConstants endpoint paths conform to standard REST conventions', () {
       expect(ApiConstants.categories, equals('/categories'));
-      expect(ApiConstants.products, equals('/products'));
+      expect(ApiConstants.products, equals('/pizzas'));
       expect(ApiConstants.orders, equals('/orders'));
+      expect(ApiConstants.customerOrders, equals('/v1/customer/orders'));
       expect(ApiConstants.offers, equals('/offers'));
       expect(ApiConstants.login, equals('/v1/customer/login'));
       expect(ApiConstants.register, equals('/v1/customer/register'));

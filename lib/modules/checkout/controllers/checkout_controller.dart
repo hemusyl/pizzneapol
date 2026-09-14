@@ -1,9 +1,11 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../app/routes/app_routes.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/models/order_model.dart';
 import '../../../data/models/payment_method.dart';
+import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/order_repository.dart';
 import '../../cart/controllers/cart_controller.dart';
 import '../../home/controllers/location_controller.dart';
@@ -192,11 +194,26 @@ class CheckoutController extends GetxController {
       return null;
     }
 
+    // Check customer authentication status
+    final authRepo = Get.isRegistered<AuthRepository>()
+        ? Get.find<AuthRepository>()
+        : null;
+    final isLoggedIn = authRepo?.isAuthenticated ?? false;
+
+    if (authRepo != null && !isLoggedIn) {
+      _showFeedbackSnackbar(
+        title: 'Sign In Required',
+        message: 'Please sign in or create an account to place your order.',
+        isError: true,
+      );
+      if (!Get.testMode && Get.context != null) {
+        Get.toNamed(Routes.LOGIN);
+      }
+      return null;
+    }
+
     isPlacingOrder.value = true;
     try {
-      // Simulate network latency (e.g., payment gateway / server verification)
-      await Future.delayed(const Duration(milliseconds: 600));
-
       final orderId = 'PZ-${(DateTime.now().millisecondsSinceEpoch % 90000) + 10000}';
       final paymentTitle = PaymentMethodOption.availableMethods
           .firstWhere((p) => p.type == selectedPaymentMethod.value)
@@ -212,23 +229,26 @@ class CheckoutController extends GetxController {
         discount: totalDiscount,
         total: grandTotal,
         orderDate: DateTime.now(),
-        status: OrderStatus.confirmed,
+        status: OrderStatus.pending,
         deliveryNotes: deliveryNotes.value.isNotEmpty ? deliveryNotes.value : null,
       );
 
-      lastPlacedOrder.value = newOrder;
+      OrderModel createdOrder = newOrder;
+      if (Get.isRegistered<OrderRepository>()) {
+        createdOrder = await Get.find<OrderRepository>().createOrder(newOrder);
+      }
 
-      // Add to OrdersController / OrderRepository
+      lastPlacedOrder.value = createdOrder;
+
+      // Add to OrdersController
       if (Get.isRegistered<OrdersController>()) {
-        Get.find<OrdersController>().addOrder(newOrder);
-      } else if (Get.isRegistered<OrderRepository>()) {
-        Get.find<OrderRepository>().createOrder(newOrder);
+        Get.find<OrdersController>().addOrder(createdOrder);
       }
 
       // Clear the cart
       cartController.clearCart();
 
-      return newOrder;
+      return createdOrder;
     } finally {
       isPlacingOrder.value = false;
     }
@@ -239,7 +259,7 @@ class CheckoutController extends GetxController {
     required String message,
     required bool isError,
   }) {
-    if (Get.context != null) {
+    if (Get.context != null && !Get.testMode) {
       Get.snackbar(
         title,
         message,

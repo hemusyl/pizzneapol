@@ -52,19 +52,42 @@ class ProductModel {
       return defaultVal;
     }
 
+    String parseImage() {
+      final imgUrl = json['image_url']?.toString();
+      if (imgUrl != null && imgUrl.isNotEmpty) return imgUrl;
+      final rawImg = json['image']?.toString() ?? '';
+      if (rawImg.isEmpty) return '';
+      if (rawImg.startsWith('http://') || rawImg.startsWith('https://') || rawImg.startsWith('assets/')) {
+        return rawImg;
+      }
+      return 'https://pizzaabd.shop/storage/$rawImg';
+    }
+
+    String parseCategoryName() {
+      if (json['category'] is Map && json['category']['name'] != null) {
+        return json['category']['name'].toString();
+      }
+      return (json['category_name'] ?? json['categoryName'])?.toString() ?? '';
+    }
+
+    List<String> parseSizes() {
+      if (json['sizes'] is List) {
+        return List<String>.from((json['sizes'] as List).map((e) => e.toString()));
+      }
+      return const ['Small', 'Medium', 'Large'];
+    }
+
     return ProductModel(
       id: parseInt(json['id']),
       name: json['name']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       price: parseDouble(json['price']),
-      image: json['image']?.toString() ?? '',
-      categoryId: parseInt(json['category_id'] ?? json['categoryId']),
-      categoryName: (json['category_name'] ?? json['categoryName'])?.toString() ?? '',
-      available: parseBool(json['available'] ?? json['is_available'], true),
+      image: parseImage(),
+      categoryId: parseInt(json['category_id'] ?? json['categoryId'] ?? (json['category'] is Map ? json['category']['id'] : null)),
+      categoryName: parseCategoryName(),
+      available: parseBool(json['status'] ?? json['available'] ?? json['is_available'], true),
       rating: parseDouble(json['rating'], 4.8),
-      sizes: json['sizes'] is List
-          ? List<String>.from((json['sizes'] as List).map((e) => e.toString()))
-          : const ['Small', 'Medium', 'Large'],
+      sizes: parseSizes(),
       ingredients: json['ingredients'] is List
           ? List<String>.from((json['ingredients'] as List).map((e) => e.toString()))
           : const [],

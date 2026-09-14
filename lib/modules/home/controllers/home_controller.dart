@@ -13,8 +13,14 @@ class HomeController extends GetxController {
   HomeController({
     CategoryRepository? categoryRepository,
     ProductRepository? productRepository,
-  })  : _categoryRepository = categoryRepository ?? CategoryRepository(),
-        _productRepository = productRepository ?? ProductRepository();
+  })  : _categoryRepository = categoryRepository ??
+            (Get.isRegistered<CategoryRepository>()
+                ? Get.find<CategoryRepository>()
+                : CategoryRepository()),
+        _productRepository = productRepository ??
+            (Get.isRegistered<ProductRepository>()
+                ? Get.find<ProductRepository>()
+                : ProductRepository());
 
   /// Loading state indicator
   final RxBool isLoading = true.obs;
@@ -46,18 +52,21 @@ class HomeController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      // 1. Fetch categories
+      // 1. Fetch products
+      final loadedProducts = await _productRepository.getProducts();
+      allProducts.assignAll(loadedProducts);
+
+      // 2. Fetch categories
       final loadedCategories = await _categoryRepository.getAllCategories();
       categories.assignAll(loadedCategories);
 
-      // Select first category by default (e.g., Pizza) if available
+      // Select first category with products, or the first category by default
       if (categories.isNotEmpty && selectedCategory.value == null) {
-        selectedCategory.value = categories.first;
+        final withProducts = categories.firstWhereOrNull(
+          (cat) => allProducts.any((p) => p.categoryId == cat.id),
+        );
+        selectedCategory.value = withProducts ?? categories.first;
       }
-
-      // 2. Fetch products
-      final loadedProducts = await _productRepository.getProducts();
-      allProducts.assignAll(loadedProducts);
 
       // 3. Filter products for the active category
       _applyCategoryFilter();
