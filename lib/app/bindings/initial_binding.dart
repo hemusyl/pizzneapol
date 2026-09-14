@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../data/providers/api_provider.dart';
+import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/category_repository.dart';
 import '../../data/repositories/order_repository.dart';
 import '../../data/repositories/product_repository.dart';
@@ -26,6 +27,10 @@ class InitialBinding extends Bindings {
     );
     Get.put<OrderRepository>(
       OrderRepository(apiProvider: Get.find<ApiProvider>()),
+      permanent: true,
+    );
+    Get.put<AuthRepository>(
+      AuthRepository(apiProvider: Get.find<ApiProvider>()),
       permanent: true,
     );
 

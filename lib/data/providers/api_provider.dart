@@ -115,16 +115,31 @@ class ApiProvider extends GetConnect {
   // AUTHENTICATION
   // ==========================================
 
-  /// POST /auth/login: Authenticates user and returns Sanctum token
-  Future<Response<dynamic>> login(String email, String password) async {
+  /// POST /v1/customer/login: Authenticates customer with Email or Phone and Password
+  Future<Response<dynamic>> login(String identifier, String password) async {
+    final cleanIdentifier = identifier.trim();
     return await post(ApiConstants.login, {
-      'email': email,
+      'mobile': cleanIdentifier,
+      'email': cleanIdentifier,
+      'phone': cleanIdentifier,
+      'email_or_phone': cleanIdentifier,
       'password': password,
     });
   }
 
-  /// POST /auth/register: Registers new user
+  /// POST /v1/customer/register: Registers new customer with Name, Mobile, Email, Address, Password & Confirmation
   Future<Response<dynamic>> register(Map<String, dynamic> userData) async {
-    return await post(ApiConstants.register, userData);
+    final Map<String, dynamic> payload = Map<String, dynamic>.from(userData);
+    if (payload.containsKey('phone') && !payload.containsKey('mobile')) {
+      payload['mobile'] = payload['phone'];
+    } else if (payload.containsKey('mobile') && !payload.containsKey('phone')) {
+      payload['phone'] = payload['mobile'];
+    }
+    if (payload.containsKey('confirm_password') && !payload.containsKey('password_confirmation')) {
+      payload['password_confirmation'] = payload['confirm_password'];
+    } else if (payload.containsKey('password_confirmation') && !payload.containsKey('confirm_password')) {
+      payload['confirm_password'] = payload['password_confirmation'];
+    }
+    return await post(ApiConstants.register, payload);
   }
 }

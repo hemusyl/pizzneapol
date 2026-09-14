@@ -14,4 +14,6 @@ abstract class Routes {
   static const SEARCH = '/search';
   static const FAVORITES = '/favorites';
   static const OFFERS = '/offers';
+  static const LOGIN = '/login';
+  static const REGISTER = '/register';
 }

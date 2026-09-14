@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
+import '../../../data/repositories/auth_repository.dart';
 import '../../main_nav/controllers/main_nav_controller.dart';
 import '../controllers/profile_controller.dart';
 
@@ -336,29 +337,57 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  /// Sign out button
+  /// Sign in and sign out buttons
   Widget _buildSignOutButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: OutlinedButton.icon(
-        onPressed: () => _showSignOutConfirmDialog(context),
-        icon: const Icon(Icons.logout_rounded, color: AppColors.error),
-        label: const Text(
-          'Sign Out',
-          style: TextStyle(
-            color: AppColors.error,
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton.icon(
+            onPressed: () => Get.toNamed(Routes.LOGIN),
+            icon: const Icon(Icons.login_rounded, color: Colors.white),
+            label: const Text(
+              'Sign In / Switch Account',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              elevation: 0,
+            ),
           ),
         ),
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: AppColors.error, width: 1.2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: OutlinedButton.icon(
+            onPressed: () => _showSignOutConfirmDialog(context),
+            icon: const Icon(Icons.logout_rounded, color: AppColors.error),
+            label: const Text(
+              'Sign Out',
+              style: TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppColors.error, width: 1.2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -534,7 +563,11 @@ class _ProfileViewState extends State<ProfileView> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(ctx);
+                if (Get.isRegistered<AuthRepository>()) {
+                  Get.find<AuthRepository>().logout();
+                }
                 _controller.signOut();
+                Get.toNamed(Routes.LOGIN);
               },
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
               child: const Text('Sign Out', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),

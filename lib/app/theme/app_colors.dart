@@ -25,6 +25,7 @@ class AppColors {
   static const Color textPrimary = Color(0xFF1E1E24); // Bold, high-contrast dark text
   static const Color textSecondary = Color(0xFF7A7A85); // Subtitle & ingredient gray text
   static const Color textLight = Color(0xFFA6A6B0);
+  static const Color textHint = Color(0xFFA6A6B0);
   static const Color textWhite = Colors.white;
 
   // Borders & Dividers

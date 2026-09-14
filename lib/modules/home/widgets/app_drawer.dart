@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 
+import '../../../data/repositories/auth_repository.dart';
+import '../../profile/controllers/profile_controller.dart';
+
 /// Navigation Drawer opened by the hamburger menu icon
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -15,30 +18,45 @@ class AppDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           // Profile Header
-          UserAccountsDrawerHeader(
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-            ),
-            currentAccountPicture: Container(
+          Obx(() {
+            final profileCtrl = Get.isRegistered<ProfileController>()
+                ? Get.find<ProfileController>()
+                : null;
+            final user = profileCtrl?.user.value;
+            final name = user != null && user.name.isNotEmpty ? user.name : 'Pizza Guest';
+            final email = user != null && (user.email.isNotEmpty || user.phone.isNotEmpty)
+                ? (user.email.isNotEmpty ? user.email : user.phone)
+                : 'Tap to Sign In / Register';
+
+            return UserAccountsDrawerHeader(
               decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-              ),
-              child: const Icon(
-                Icons.person,
-                size: 45,
                 color: AppColors.primary,
               ),
-            ),
-            accountName: const Text(
-              'Humayun Kabir',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            accountEmail: const Text(
-              'customer@pizzneapol.com',
-              style: TextStyle(color: Colors.white70),
-            ),
-          ),
+              onDetailsPressed: () {
+                Get.back();
+                Get.toNamed(Routes.LOGIN);
+              },
+              currentAccountPicture: Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: const Icon(
+                  Icons.person,
+                  size: 45,
+                  color: AppColors.primary,
+                ),
+              ),
+              accountName: Text(
+                name,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              accountEmail: Text(
+                email,
+                style: const TextStyle(color: Colors.white70),
+              ),
+            );
+          }),
 
           // Drawer Links
           _drawerItem(
@@ -110,13 +128,28 @@ class AppDrawer extends StatelessWidget {
             },
           ),
           _drawerItem(
+            icon: Icons.login_rounded,
+            title: 'Sign In / Register',
+            textColor: AppColors.primary,
+            iconColor: AppColors.primary,
+            onTap: () {
+              Get.back();
+              Get.toNamed(Routes.LOGIN);
+            },
+          ),
+          _drawerItem(
             icon: Icons.logout_rounded,
             title: 'Logout',
             textColor: AppColors.error,
             iconColor: AppColors.error,
             onTap: () {
               Get.back();
-              Get.snackbar('Logged Out', 'You have been signed out.');
+              if (Get.isRegistered<AuthRepository>()) {
+                Get.find<AuthRepository>().logout();
+              }
+              if (Get.isRegistered<ProfileController>()) {
+                Get.find<ProfileController>().signOut();
+              }
             },
           ),
         ],

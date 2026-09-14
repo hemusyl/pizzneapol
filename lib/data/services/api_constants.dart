@@ -7,9 +7,9 @@ class ApiConstants {
   static const String defaultBaseUrl = 'https://pizzaabd.shop/api';
 
   // Authentication Endpoints
-  static const String login = '/auth/login';
-  static const String register = '/auth/register';
-  static const String profile = '/auth/profile';
+  static const String login = '/v1/customer/login';
+  static const String register = '/v1/customer/register';
+  static const String profile = '/v1/customer/profile';
 
   // Catalog Endpoints
   static const String categories = '/categories';

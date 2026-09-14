@@ -40,8 +40,8 @@ void main() {
       expect(ApiConstants.products, equals('/products'));
       expect(ApiConstants.orders, equals('/orders'));
       expect(ApiConstants.offers, equals('/offers'));
-      expect(ApiConstants.login, equals('/auth/login'));
-      expect(ApiConstants.register, equals('/auth/register'));
+      expect(ApiConstants.login, equals('/v1/customer/login'));
+      expect(ApiConstants.register, equals('/v1/customer/register'));
       expect(ApiConstants.jsonMediaType, equals('application/json'));
     });
   });

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pizzneapol/data/models/category_model.dart';
 import 'package:pizzneapol/data/models/product_model.dart';
+import 'package:pizzneapol/data/models/user_model.dart';
 
 void main() {
   group('CategoryModel Tests', () {
@@ -78,6 +79,47 @@ void main() {
       expect(updated.name, 'Classic Pepperoni');
       expect(original.price, 12.0);
       expect(original.isFavorite, false);
+    });
+  });
+
+  group('UserModel Tests', () {
+    test('Correctly parses from Laravel user JSON with mobile and address', () {
+      final json = {
+        'id': 19,
+        'name': 'Humayun Kabir',
+        'email': 'humayun@example.com',
+        'mobile': '01712345678',
+        'address': 'Dhanmondi, Dhaka',
+        'created_at': '2026-09-14T09:55:49.000000Z',
+      };
+
+      final user = UserModel.fromJson(json);
+
+      expect(user.id, '19');
+      expect(user.name, 'Humayun Kabir');
+      expect(user.email, 'humayun@example.com');
+      expect(user.phone, '01712345678');
+      expect(user.address, 'Dhanmondi, Dhaka');
+      expect(user.memberSince.year, 2026);
+    });
+
+    test('toJson and copyWith include address and phone', () {
+      final user = UserModel(
+        id: '1',
+        name: 'Test Customer',
+        email: 'customer@pizzneapol.com',
+        phone: '01800000000',
+        address: 'Uttara, Dhaka',
+        memberSince: DateTime(2026, 1, 1),
+      );
+
+      final json = user.toJson();
+      expect(json['address'], 'Uttara, Dhaka');
+      expect(json['mobile'], '01800000000');
+
+      final updated = user.copyWith(address: 'Gulshan 2, Dhaka');
+      expect(updated.address, 'Gulshan 2, Dhaka');
+      expect(updated.name, 'Test Customer');
     });
   });
 }

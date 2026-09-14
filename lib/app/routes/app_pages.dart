@@ -1,6 +1,9 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:get/get.dart';
+import '../../modules/auth/bindings/auth_binding.dart';
+import '../../modules/auth/views/login_view.dart';
+import '../../modules/auth/views/register_view.dart';
 import '../../modules/cart/bindings/cart_binding.dart';
 import '../../modules/cart/views/cart_view.dart';
 import '../../modules/checkout/bindings/checkout_binding.dart';
@@ -88,6 +91,18 @@ class AppPages {
       name: Routes.OFFERS,
       page: () => const OffersView(),
       binding: OffersBinding(),
+      transition: Transition.rightToLeftWithFade,
+    ),
+    GetPage(
+      name: Routes.LOGIN,
+      page: () => const LoginView(),
+      binding: AuthBinding(),
+      transition: Transition.rightToLeftWithFade,
+    ),
+    GetPage(
+      name: Routes.REGISTER,
+      page: () => const RegisterView(),
+      binding: AuthBinding(),
       transition: Transition.rightToLeftWithFade,
     ),
   ];

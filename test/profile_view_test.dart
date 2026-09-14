@@ -46,6 +46,7 @@ void main() {
     // 5. Verify Sign Out Button and Dialog
     final signOutBtn = find.text('Sign Out');
     expect(signOutBtn, findsOneWidget);
+    await tester.ensureVisible(signOutBtn);
     await tester.tap(signOutBtn);
     await tester.pumpAndSettle();
 
