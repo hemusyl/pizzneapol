@@ -35,16 +35,42 @@ class FoodImageView extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(isCircular ? size / 2 : 16),
-        child: Image.asset(
-          imagePath,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildFallbackFoodGraphic();
-          },
-        ),
+        child: _buildImageContent(),
       ),
+    );
+  }
+
+  Widget _buildImageContent() {
+    if (imagePath.trim().isEmpty) {
+      return _buildFallbackFoodGraphic();
+    }
+
+    final isNetwork = imagePath.startsWith('http://') || imagePath.startsWith('https://');
+
+    if (isNetwork) {
+      return Image.network(
+        imagePath,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildFallbackFoodGraphic();
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return _buildFallbackFoodGraphic();
+        },
+      );
+    }
+
+    return Image.asset(
+      imagePath,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return _buildFallbackFoodGraphic();
+      },
     );
   }
 

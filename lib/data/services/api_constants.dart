@@ -3,10 +3,8 @@ class ApiConstants {
   ApiConstants._();
 
   /// Base URL for the Laravel backend API.
-  /// For Android emulator: 'http://10.0.2.2:8000/api'
-  /// For iOS simulator or macOS desktop: 'http://localhost:8000/api'
-  /// For production: 'https://api.pizzneapol.com/api'
-  static const String defaultBaseUrl = 'https://api.pizzneapol.com/api';
+  /// Live Production URL: 'https://pizzaabd.shop/api'
+  static const String defaultBaseUrl = 'https://pizzaabd.shop/api';
 
   // Authentication Endpoints
   static const String login = '/auth/login';

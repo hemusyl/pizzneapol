@@ -48,7 +48,7 @@ void main() {
     });
 
     test('ProductRepository with ApiProvider enables remote mode with fallback', () async {
-      final api = ApiProvider(customBaseUrl: 'https://api.pizzneapol.com/api');
+      final api = ApiProvider(customBaseUrl: 'https://pizzaabd.shop/api');
       final repo = ProductRepository(apiProvider: api);
 
       expect(repo.isRemote, isTrue);
