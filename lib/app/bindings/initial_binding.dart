@@ -7,6 +7,8 @@ import '../../data/repositories/product_repository.dart';
 import '../../modules/cart/controllers/cart_controller.dart';
 import '../../modules/favorites/controllers/favorite_controller.dart';
 import '../../modules/home/controllers/location_controller.dart';
+import '../../modules/profile/controllers/profile_controller.dart';
+import '../../data/services/notification_service.dart';
 
 /// Global initial bindings initialized before the app displays its first view.
 /// Registers application-wide singletons.
@@ -38,5 +40,9 @@ class InitialBinding extends Bindings {
     Get.put<CartController>(CartController(), permanent: true);
     Get.put<LocationController>(LocationController(), permanent: true);
     Get.put<FavoriteController>(FavoriteController(), permanent: true);
+    Get.put<ProfileController>(ProfileController(), permanent: true);
+
+    // 4. Push Notification Service
+    Get.putAsync<NotificationService>(() => NotificationService().init(), permanent: true);
   }
 }

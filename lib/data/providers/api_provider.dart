@@ -142,4 +142,11 @@ class ApiProvider extends GetConnect {
     }
     return await post(ApiConstants.register, payload);
   }
+
+  /// POST /v1/customer/fcm-token: Registers or updates device FCM token for push notifications
+  Future<Response<dynamic>> updateFcmToken(String token) async {
+    return await post(ApiConstants.updateFcmToken, {
+      'fcm_token': token,
+    });
+  }
 }

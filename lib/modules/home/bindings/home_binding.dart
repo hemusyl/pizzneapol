@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../../../data/providers/api_provider.dart';
 import '../../../data/repositories/category_repository.dart';
 import '../../../data/repositories/product_repository.dart';
+import '../../profile/controllers/profile_controller.dart';
 import '../controllers/home_controller.dart';
 import '../controllers/location_controller.dart';
 
@@ -19,6 +20,9 @@ class HomeBinding extends Bindings {
     }
     if (!Get.isRegistered<LocationController>()) {
       Get.lazyPut<LocationController>(() => LocationController());
+    }
+    if (!Get.isRegistered<ProfileController>()) {
+      Get.put<ProfileController>(ProfileController(), permanent: true);
     }
     Get.lazyPut<HomeController>(() => HomeController(
           categoryRepository: Get.find<CategoryRepository>(),

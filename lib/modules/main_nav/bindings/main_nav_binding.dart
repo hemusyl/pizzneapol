@@ -50,7 +50,7 @@ class MainNavBinding extends Bindings {
     }
 
     if (!Get.isRegistered<ProfileController>()) {
-      Get.lazyPut<ProfileController>(() => ProfileController());
+      Get.put<ProfileController>(ProfileController(), permanent: true);
     }
 
     if (!Get.isRegistered<FavoriteController>()) {

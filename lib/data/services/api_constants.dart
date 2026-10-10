@@ -10,6 +10,7 @@ class ApiConstants {
   static const String login = '/v1/customer/login';
   static const String register = '/v1/customer/register';
   static const String profile = '/v1/customer/profile';
+  static const String updateFcmToken = '/v1/customer/fcm-token';
 
   // Catalog Endpoints
   static const String categories = '/categories';

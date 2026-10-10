@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/services/session_service.dart';
+import '../../../data/services/notification_service.dart';
 import '../../profile/controllers/profile_controller.dart';
 
 /// Controller managing splash screen animations, session restoration,
@@ -33,6 +34,11 @@ class SplashController extends GetxController {
         }
         if (Get.isRegistered<ProfileController>()) {
           Get.find<ProfileController>().setUser(user);
+        } else {
+          Get.put(ProfileController(), permanent: true).setUser(user);
+        }
+        if (Get.isRegistered<NotificationService>()) {
+          Get.find<NotificationService>().syncTokenWithBackend();
         }
       }
     } catch (_) {

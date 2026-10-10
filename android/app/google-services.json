@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "797889211964",
+    "project_id": "pizznapoli-da47b",
+    "storage_bucket": "pizznapoli-da47b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:797889211964:android:3547f43d4be0def13e5d39",
+        "android_client_info": {
+          "package_name": "com.pizzneapol.pizzneapol"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXlE9x17lGbx0W9cgsg8XnwnYWsL6cgZ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

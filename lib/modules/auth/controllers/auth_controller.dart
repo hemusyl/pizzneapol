@@ -4,6 +4,7 @@ import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/services/session_service.dart';
+import '../../../data/services/notification_service.dart';
 import '../../profile/controllers/profile_controller.dart';
 
 /// Controller handling Customer Authentication (Login & Register) state and interactions.
@@ -108,13 +109,20 @@ class AuthController extends GetxController {
           user: result.user!,
         );
 
-        // Synchronize with ProfileController if active
+        // Synchronize with ProfileController
         if (Get.isRegistered<ProfileController>()) {
           Get.find<ProfileController>().setUser(result.user!);
+        } else {
+          Get.put(ProfileController(), permanent: true).setUser(result.user!);
         }
 
         // Clear password
         loginPasswordController.clear();
+
+        // Synchronize FCM push notification token with backend
+        if (Get.isRegistered<NotificationService>()) {
+          Get.find<NotificationService>().syncTokenWithBackend();
+        }
 
         // Redirect immediately to Home screen
         if (Get.key.currentState != null) {
@@ -204,11 +212,18 @@ class AuthController extends GetxController {
 
         if (Get.isRegistered<ProfileController>()) {
           Get.find<ProfileController>().setUser(result.user!);
+        } else {
+          Get.put(ProfileController(), permanent: true).setUser(result.user!);
         }
 
         // Clear sensitive inputs
         registerPasswordController.clear();
         registerConfirmPasswordController.clear();
+
+        // Synchronize FCM push notification token with backend
+        if (Get.isRegistered<NotificationService>()) {
+          Get.find<NotificationService>().syncTokenWithBackend();
+        }
 
         if (Get.key.currentState != null) {
           Get.offAllNamed(Routes.MAIN);

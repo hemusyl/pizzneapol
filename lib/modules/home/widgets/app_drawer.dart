@@ -3,15 +3,20 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 
-import '../../../data/repositories/auth_repository.dart';
 import '../../profile/controllers/profile_controller.dart';
 
 /// Navigation Drawer opened by the hamburger menu icon
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
+  ProfileController get _profileCtrl => Get.isRegistered<ProfileController>()
+      ? Get.find<ProfileController>()
+      : Get.put(ProfileController(), permanent: true);
+
   @override
   Widget build(BuildContext context) {
+    final profileCtrl = _profileCtrl;
+
     return Drawer(
       backgroundColor: Colors.white,
       child: ListView(
@@ -19,10 +24,7 @@ class AppDrawer extends StatelessWidget {
         children: [
           // Profile Header
           Obx(() {
-            final profileCtrl = Get.isRegistered<ProfileController>()
-                ? Get.find<ProfileController>()
-                : null;
-            final user = profileCtrl?.user.value;
+            final user = profileCtrl.user.value;
             final name = user != null && user.name.isNotEmpty ? user.name : 'Pizza Guest';
             final email = user != null && (user.email.isNotEmpty || user.phone.isNotEmpty)
                 ? (user.email.isNotEmpty ? user.email : user.phone)
@@ -34,7 +36,11 @@ class AppDrawer extends StatelessWidget {
               ),
               onDetailsPressed: () {
                 Get.back();
-                Get.toNamed(Routes.LOGIN);
+                if (profileCtrl.isLoggedIn) {
+                  Get.toNamed(Routes.PROFILE);
+                } else {
+                  Get.toNamed(Routes.LOGIN);
+                }
               },
               currentAccountPicture: Container(
                 decoration: const BoxDecoration(
@@ -128,10 +134,7 @@ class AppDrawer extends StatelessWidget {
             },
           ),
           Obx(() {
-            final profileCtrl = Get.isRegistered<ProfileController>()
-                ? Get.find<ProfileController>()
-                : null;
-            final isLoggedIn = profileCtrl?.isLoggedIn ?? false;
+            final isLoggedIn = profileCtrl.isLoggedIn;
 
             if (!isLoggedIn) {
               return _drawerItem(
@@ -153,12 +156,7 @@ class AppDrawer extends StatelessWidget {
               iconColor: AppColors.error,
               onTap: () {
                 Get.back();
-                if (Get.isRegistered<AuthRepository>()) {
-                  Get.find<AuthRepository>().logout();
-                }
-                if (Get.isRegistered<ProfileController>()) {
-                  Get.find<ProfileController>().signOut();
-                }
+                profileCtrl.signOut();
               },
             );
           }),
