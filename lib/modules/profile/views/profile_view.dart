@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../../data/services/notification_service.dart';
 import '../../main_nav/controllers/main_nav_controller.dart';
 import '../controllers/profile_controller.dart';
 
@@ -42,6 +44,22 @@ class _ProfileViewState extends State<ProfileView> {
             // 1. Profile Header Card
             _buildProfileHeader(context),
             const SizedBox(height: 20),
+
+            // Restaurant Management Section (Visible for owners or when Owner Mode is enabled)
+            Obx(() {
+              if (_controller.canAccessOwnerDashboard) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader('RESTAURANT MANAGEMENT'),
+                    const SizedBox(height: 8),
+                    _buildOwnerDashboardCard(context),
+                    const SizedBox(height: 20),
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            }),
 
             // 2. Account Section
             _buildSectionHeader('ACCOUNT'),
@@ -297,6 +315,16 @@ class _ProfileViewState extends State<ProfileView> {
                 activeTrackColor: AppColors.primaryPeach,
                 onChanged: (val) => _controller.toggleSpecialOffers(val),
               ),
+              const Divider(height: 1, indent: 56, color: AppColors.divider),
+              SwitchListTile(
+                secondary: const Icon(Icons.storefront_outlined, color: AppColors.primary),
+                title: const Text('Restaurant Owner Mode', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                subtitle: const Text('Enable kitchen management & order dispatch', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                value: _controller.isOwnerMode.value,
+                activeThumbColor: AppColors.primary,
+                activeTrackColor: AppColors.primaryPeach,
+                onChanged: (val) => _controller.toggleOwnerMode(val),
+              ),
             ],
           );
         }),
@@ -348,10 +376,110 @@ class _ProfileViewState extends State<ProfileView> {
               },
             ),
             const Divider(height: 1, indent: 56, color: AppColors.divider),
+            ListTile(
+              leading: const Icon(Icons.notifications_active_outlined, color: AppColors.primary),
+              title: const Text('FCM Device Token', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              subtitle: const Text('Tap to copy device push token for Firebase testing', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              trailing: const Icon(Icons.copy_rounded, size: 18, color: AppColors.textSecondary),
+              onTap: () {
+                final fcmService = Get.isRegistered<NotificationService>()
+                    ? Get.find<NotificationService>()
+                    : null;
+                final token = fcmService?.fcmToken.value;
+                if (token != null && token.isNotEmpty) {
+                  Clipboard.setData(ClipboardData(text: token));
+                  Get.snackbar(
+                    'FCM Token Copied!',
+                    'Device token copied to clipboard for Firebase Console testing.',
+                    snackPosition: SnackPosition.TOP,
+                    backgroundColor: Colors.green.shade700,
+                    colorText: Colors.white,
+                    duration: const Duration(seconds: 4),
+                  );
+                } else {
+                  Get.snackbar(
+                    'Token Not Available',
+                    'Waiting for FCM token generation from Google Play Services.',
+                    snackPosition: SnackPosition.TOP,
+                    backgroundColor: Colors.orange.shade800,
+                    colorText: Colors.white,
+                  );
+                }
+              },
+            ),
+            const Divider(height: 1, indent: 56, color: AppColors.divider),
             const ListTile(
               leading: Icon(Icons.info_outline_rounded, color: AppColors.textSecondary),
               title: Text('App Version', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
               trailing: Text('v1.0.0 (Step 14)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textSecondary)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Restaurant Owner & Kitchen Management Card
+  Widget _buildOwnerDashboardCard(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.5),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              color: AppColors.primaryPeach,
+              child: Row(
+                children: [
+                  const Icon(Icons.local_pizza_rounded, color: AppColors.primary),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Kitchen & Orders Dashboard',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'OWNER',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.soup_kitchen_outlined, color: AppColors.primary),
+              title: const Text(
+                'Live Kitchen Order Manager',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              ),
+              subtitle: const Text(
+                'Accept orders, advance oven stages & trigger push notifications',
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textSecondary),
+              onTap: () => Get.toNamed(Routes.OWNER_ORDERS),
             ),
           ],
         ),

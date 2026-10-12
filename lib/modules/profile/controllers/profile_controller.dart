@@ -26,6 +26,12 @@ class ProfileController extends GetxController {
   final RxBool orderAlerts = true.obs;
   final RxBool specialOffers = false.obs;
 
+  /// Restaurant Owner / Kitchen Manager mode toggle (for testing/admin access)
+  final RxBool isOwnerMode = false.obs;
+
+  /// Whether current user can access the Owner / Kitchen Dashboard
+  bool get canAccessOwnerDashboard => (user.value?.isOwner ?? false) || isOwnerMode.value;
+
   @override
   void onInit() {
     super.onInit();
@@ -83,6 +89,25 @@ class ProfileController extends GetxController {
   /// Toggles promotional emails and notifications
   void toggleSpecialOffers(bool value) {
     specialOffers.value = value;
+  }
+
+  /// Toggles simulated Restaurant Owner / Kitchen Manager role
+  void toggleOwnerMode(bool value) {
+    isOwnerMode.value = value;
+    if (Get.context != null) {
+      Get.snackbar(
+        value ? 'Restaurant Owner Mode Enabled' : 'Customer Mode Active',
+        value
+            ? 'You can now manage kitchen orders and trigger push notifications!'
+            : 'Switched back to standard customer view.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: value ? const Color(0xFFF36C0A) : Colors.grey.shade800,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+        duration: const Duration(seconds: 3),
+      );
+    }
   }
 
   /// Performs user sign out

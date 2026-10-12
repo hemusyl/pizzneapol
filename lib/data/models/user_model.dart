@@ -7,6 +7,7 @@ class UserModel {
   final String address;
   final String avatarUrl;
   final DateTime memberSince;
+  final String role;
 
   const UserModel({
     required this.id,
@@ -16,7 +17,11 @@ class UserModel {
     this.address = '',
     this.avatarUrl = '',
     required this.memberSince,
+    this.role = 'customer',
   });
+
+  /// Whether the user has restaurant owner / kitchen manager privileges
+  bool get isOwner => role.toLowerCase() == 'owner' || role.toLowerCase() == 'admin';
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -26,6 +31,7 @@ class UserModel {
       phone: json['mobile']?.toString() ?? json['phone']?.toString() ?? '',
       address: json['address']?.toString() ?? '',
       avatarUrl: json['avatar_url']?.toString() ?? json['avatarUrl']?.toString() ?? '',
+      role: json['role']?.toString() ?? 'customer',
       memberSince: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now()
           : (json['member_since'] != null
@@ -43,6 +49,7 @@ class UserModel {
       'mobile': phone,
       'address': address,
       'avatar_url': avatarUrl,
+      'role': role,
       'member_since': memberSince.toIso8601String(),
     };
   }
@@ -55,6 +62,7 @@ class UserModel {
     String? address,
     String? avatarUrl,
     DateTime? memberSince,
+    String? role,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -64,6 +72,7 @@ class UserModel {
       address: address ?? this.address,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       memberSince: memberSince ?? this.memberSince,
+      role: role ?? this.role,
     );
   }
 }

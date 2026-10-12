@@ -18,6 +18,8 @@ import '../../modules/offers/bindings/offers_binding.dart';
 import '../../modules/offers/views/offers_view.dart';
 import '../../modules/orders/bindings/orders_binding.dart';
 import '../../modules/orders/views/orders_view.dart';
+import '../../modules/owner_orders/bindings/owner_orders_binding.dart';
+import '../../modules/owner_orders/views/owner_orders_view.dart';
 import '../../modules/product/bindings/product_binding.dart';
 import '../../modules/product/views/product_details_view.dart';
 import '../../modules/profile/bindings/profile_binding.dart';
@@ -111,6 +113,12 @@ class AppPages {
       name: Routes.REGISTER,
       page: () => const RegisterView(),
       binding: AuthBinding(),
+      transition: Transition.rightToLeftWithFade,
+    ),
+    GetPage(
+      name: Routes.OWNER_ORDERS,
+      page: () => const OwnerOrdersView(),
+      binding: OwnerOrdersBinding(),
       transition: Transition.rightToLeftWithFade,
     ),
   ];
